@@ -7,11 +7,39 @@ meta:
   modified: 1769718184434
   description: ""
 collection:
+  - url: "{{ _.base_url }}/accounts/{{ _.accountId }}"
+    name: Delete an Account
+    meta:
+      id: req_082538f03dfe482db1b535fde1dfa021
+      created: 1769786434711
+      modified: 1769786714039
+      isPrivate: false
+      description: ""
+      sortKey: -1769786434711
+    method: DELETE
+    headers:
+      - name: User-Agent
+        value: insomnia/12.3.0
+        description: ""
+        disabled: false
+    scripts:
+      preRequest: let data =
+        insomnia.response.json();insomnia.environment.set("accountId",
+        data.account_id);
+      afterResponse: insomnia.environment.unset("accountId")
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
   - name: accounts
     meta:
       id: fld_5aa4f21aa16247c2a0f3a924b5e6407b
       created: 1769782612768
-      modified: 1769786049485
+      modified: 1769786679498
       sortKey: -1769782612768
       description: Operations related to account management (retrieval and balance updates)
     children:
@@ -194,7 +222,7 @@ collection:
         meta:
           id: req_1f6fee5bda684ec2a2f0f1822840db1d
           created: 1769782612787
-          modified: 1769784176737
+          modified: 1769786645433
           isPrivate: false
           description: Increases the account's balance by the specified amount.
           sortKey: -1769782612787
@@ -245,6 +273,9 @@ collection:
               const payloadData = JSON.parse(response.body.toString());
               insomnia.environment.set('accountId', payloadData['account_id']);
             }
+          afterResponse: let data =
+            insomnia.response.json();insomnia.environment.set("accountId",
+            data.account_id);
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -302,13 +333,13 @@ cookieJar:
   meta:
     id: jar_0cdbeb18d6dc7989d26e92764504da4c4c59a5fb
     created: 1769718184448
-    modified: 1769786049481
+    modified: 1769786679491
 environments:
   name: Base Environment
   meta:
     id: env_0cdbeb18d6dc7989d26e92764504da4c4c59a5fb
     created: 1769718184446
-    modified: 1769786049484
+    modified: 1769786679496
     isPrivate: false
   data:
     base_url: "{{ _.scheme }}://{{ _.host }}"
@@ -317,7 +348,7 @@ environments:
       meta:
         id: env_b72db35131554f28999bc6c192d449aa
         created: 1769782612764
-        modified: 1769786049483
+        modified: 1769786679493
         isPrivate: false
         sortKey: 1769782612764
       data:
@@ -887,3 +918,13 @@ testSuites:
         code: const response =await
           insomnia.send();expect(response.status).to.equal(200);const account
           =JSON.parse(response.data);expect(account).to.have.property('account_id').that.is.a('string');
+      - name: Delete Account by ID
+        meta:
+          id: ut_13fe9869076a4b84a666ad8671d73ab0
+          created: 1769786759389
+          modified: 1769786772292
+          sortKey: -1769786529322.5
+        requestId: req_082538f03dfe482db1b535fde1dfa021
+        code: const response =await
+          insomnia.send();expect(response.status).to.equal(204);expect(response.data).to.satisfy((body)=>
+          body ===''|| body ===null);
