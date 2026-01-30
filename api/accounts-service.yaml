@@ -472,3 +472,20 @@ spec:
     id: spc_daf5d81422754e278a5124f4cb6e4935
     created: 1769718184444
     modified: 1769719272666
+testSuites:
+  - name: Accounts API Test Suite
+    meta:
+      id: uts_f4e4fdab22ba4812b830ba35891125f8
+      created: 1769784314487
+      modified: 1769784326243
+      sortKey: -1769784314488
+    tests:
+      - name: Create New Account
+        meta:
+          id: ut_7b0fde2c3d554973904f4edd77a86420
+          created: 1769784342530
+          modified: 1769784349389
+          sortKey: -1769784342530
+        code: |-
+          const response1 = await insomnia.send();
+          expect(response1.status).to.equal(200);
