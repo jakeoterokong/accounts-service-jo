@@ -1,0 +1,930 @@
+type: spec.insomnia.rest/5.0
+schema_version: "5.1"
+name: account-service
+meta:
+  id: wrk_d82ce03a547b4dda9c10df56a3d5eec8
+  created: 1769718184434
+  modified: 1769718184434
+  description: ""
+collection:
+  - url: "{{ _.base_url }}/accounts/{{ _.accountId }}"
+    name: Delete an Account
+    meta:
+      id: req_082538f03dfe482db1b535fde1dfa021
+      created: 1769786434711
+      modified: 1769786714039
+      isPrivate: false
+      description: ""
+      sortKey: -1769786434711
+    method: DELETE
+    headers:
+      - name: User-Agent
+        value: insomnia/12.3.0
+        description: ""
+        disabled: false
+    scripts:
+      preRequest: let data =
+        insomnia.response.json();insomnia.environment.set("accountId",
+        data.account_id);
+      afterResponse: insomnia.environment.unset("accountId")
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - name: accounts
+    meta:
+      id: fld_5aa4f21aa16247c2a0f3a924b5e6407b
+      created: 1769782612768
+      modified: 1769786679498
+      sortKey: -1769782612768
+      description: Operations related to account management (retrieval and balance updates)
+    children:
+      - url: "{{ _.base_url }}/accounts"
+        name: List all accounts
+        meta:
+          id: req_f80ff46bf29e4616b07f94d88387f1e1
+          created: 1769782612782
+          modified: 1769782612782
+          isPrivate: false
+          description: Returns a list of all accounts with basic details.
+          sortKey: -1769782612782
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/accounts"
+        name: Create a new account
+        meta:
+          id: req_8948c471bb1e473fba17bca4b94c31e8
+          created: 1769782612783
+          modified: 1769782870332
+          isPrivate: false
+          description: Creates a new account with an initial balance. The account ID is
+            automatically generated.
+          sortKey: -1769782612783
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "type": "savings",
+              "initial_balance": 5000
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        scripts:
+          afterResponse: >-
+            // Extract account_id from the response and store it in the
+            environment
+
+            let data =
+            insomnia.response.json();insomnia.environment.set("accountId",
+            data.account_id);
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/accounts/{{ _.accountId }}"
+        name: Retrieve a single account
+        meta:
+          id: req_98804a4d650f4122b35dc39d6d40ae5b
+          created: 1769782612785
+          modified: 1769784212102
+          isPrivate: false
+          description: Returns details for the specified account including current balance.
+          sortKey: -1769782612785
+        method: GET
+        scripts:
+          preRequest: >-
+            if (!insomnia.environment.get("accountId")) {
+              const host = insomnia.environment.get("host");
+              const scheme = insomnia.environment.get("scheme");
+              const baseUrl = `${scheme}://${host}`;
+
+              const createAccountRequest = {
+                url: `${baseUrl}/accounts`,
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: {
+                  mode: 'raw',
+                  raw: JSON.stringify({
+                    type: 'savings',
+                    initial_balance: 5000.00,
+                  }),
+                },
+              };
+
+              const response = await new Promise((resolve, reject) => {
+                insomnia.sendRequest(createAccountRequest, (err, resp) => {
+                  if (err != null) reject(err);
+                  else resolve(resp);
+                });
+              });
+
+              if (response.code !== 201) {
+                throw new Error(`Account creation failed. Status code: ${response.code}`);
+              }
+
+              const payloadData = JSON.parse(response.body.toString());
+              insomnia.environment.set('accountId', payloadData['account_id']);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/accounts/{{ _.accountId }}/debit"
+        name: Debit an account
+        meta:
+          id: req_e01d120747e042f3a07977dc895c82ae
+          created: 1769782612786
+          modified: 1769784194847
+          isPrivate: false
+          description: Decreases the account's balance by the specified amount.
+          sortKey: -1769782612786
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "amount": 100
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        scripts:
+          preRequest: >-
+            if (!insomnia.environment.get("accountId")) {
+              const host = insomnia.environment.get("host");
+              const scheme = insomnia.environment.get("scheme");
+              const baseUrl = `${scheme}://${host}`;
+
+              const createAccountRequest = {
+                url: `${baseUrl}/accounts`,
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: {
+                  mode: 'raw',
+                  raw: JSON.stringify({
+                    type: 'savings',
+                    initial_balance: 5000.00,
+                  }),
+                },
+              };
+
+              const response = await new Promise((resolve, reject) => {
+                insomnia.sendRequest(createAccountRequest, (err, resp) => {
+                  if (err != null) reject(err);
+                  else resolve(resp);
+                });
+              });
+
+              if (response.code !== 201) {
+                throw new Error(`Account creation failed. Status code: ${response.code}`);
+              }
+
+              const payloadData = JSON.parse(response.body.toString());
+              insomnia.environment.set('accountId', payloadData['account_id']);
+            }
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/accounts/{{ _.accountId }}/credit"
+        name: Credit an account
+        meta:
+          id: req_1f6fee5bda684ec2a2f0f1822840db1d
+          created: 1769782612787
+          modified: 1769786645433
+          isPrivate: false
+          description: Increases the account's balance by the specified amount.
+          sortKey: -1769782612787
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "amount": 100
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            disabled: false
+        scripts:
+          preRequest: >-
+            if (!insomnia.environment.get("accountId")) {
+              const host = insomnia.environment.get("host");
+              const scheme = insomnia.environment.get("scheme");
+              const baseUrl = `${scheme}://${host}`;
+
+              const createAccountRequest = {
+                url: `${baseUrl}/accounts`,
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: {
+                  mode: 'raw',
+                  raw: JSON.stringify({
+                    type: 'savings',
+                    initial_balance: 5000.00,
+                  }),
+                },
+              };
+
+              const response = await new Promise((resolve, reject) => {
+                insomnia.sendRequest(createAccountRequest, (err, resp) => {
+                  if (err != null) reject(err);
+                  else resolve(resp);
+                });
+              });
+
+              if (response.code !== 201) {
+                throw new Error(`Account creation failed. Status code: ${response.code}`);
+              }
+
+              const payloadData = JSON.parse(response.body.toString());
+              insomnia.environment.set('accountId', payloadData['account_id']);
+            }
+          afterResponse: let data =
+            insomnia.response.json();insomnia.environment.set("accountId",
+            data.account_id);
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: health
+    meta:
+      id: fld_caa6c3bb8b104b55a8b2e693e835f17c
+      created: 1769782612770
+      modified: 1769782612770
+      sortKey: -1769782612770
+      description: Health check endpoints for monitoring service status
+    children:
+      - url: "{{ _.base_url }}/health"
+        name: Health check endpoint
+        meta:
+          id: req_740eea33aff84dd396cb162a11737963
+          created: 1769782612774
+          modified: 1769782612774
+          isPrivate: false
+          description: Returns the API's health status
+          sortKey: -1769782612774
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/health"
+        name: Health check endpoint (HEAD)
+        meta:
+          id: req_a76bc553543b4204bb93a66b0ec0d065
+          created: 1769782612780
+          modified: 1769782612780
+          isPrivate: false
+          description: Returns the API's health status without body
+          sortKey: -1769782612780
+        method: HEAD
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_0cdbeb18d6dc7989d26e92764504da4c4c59a5fb
+    created: 1769718184448
+    modified: 1769786679491
+environments:
+  name: Base Environment
+  meta:
+    id: env_0cdbeb18d6dc7989d26e92764504da4c4c59a5fb
+    created: 1769718184446
+    modified: 1769786679496
+    isPrivate: false
+  data:
+    base_url: "{{ _.scheme }}://{{ _.host }}"
+  subEnvironments:
+    - name: OpenAPI env localhost:8081
+      meta:
+        id: env_b72db35131554f28999bc6c192d449aa
+        created: 1769782612764
+        modified: 1769786679493
+        isPrivate: false
+        sortKey: 1769782612764
+      data:
+        scheme: http
+        base_path: ""
+        host: localhost:8081
+        accountId: 9bea87c1-cd79-43bc-9d35-ccc8e584d922
+spec:
+  contents:
+    openapi: 3.0.3
+    info:
+      title: Accounts API
+      version: 1.1.0
+      description: This API manages account information and balances.
+      contact:
+        email: stephen.brown@konghq.com
+    servers:
+      - url: http://localhost:8081
+        description: Local development server
+    tags:
+      - name: accounts
+        description: Operations related to account management (retrieval and balance
+          updates)
+      - name: health
+        description: Health check endpoints for monitoring service status
+    paths:
+      /health:
+        get:
+          tags:
+            - health
+          operationId: healthCheck
+          summary: Health check endpoint
+          description: Returns the API's health status
+          responses:
+            "200":
+              description: API is healthy
+              content:
+                application/json:
+                  schema:
+                    type: string
+                  examples:
+                    success:
+                      summary: Healthy response
+                      value: Accounts API is running
+        head:
+          tags:
+            - health
+          operationId: healthCheckHead
+          summary: Health check endpoint (HEAD)
+          description: Returns the API's health status without body
+          responses:
+            "200":
+              description: API is healthy
+      /accounts:
+        get:
+          tags:
+            - accounts
+          operationId: listAccounts
+          summary: List all accounts
+          description: Returns a list of all accounts with basic details.
+          responses:
+            "200":
+              description: A list of accounts was successfully retrieved
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Account"
+                  examples:
+                    multiple_accounts:
+                      summary: Multiple accounts example
+                      value:
+                        - account_id: 123e4567-e89b-12d3-a456-426614174000
+                          type: checking
+                          balance: 1500
+                        - account_id: 987fcdeb-51a2-43e7-89bc-765432198765
+                          type: savings
+                          balance: 5000
+            "500":
+              description: Failed to retrieve accounts due to internal server error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    lock_error:
+                      summary: Database lock error
+                      value:
+                        error_code: INTERNAL_ERROR
+                        message: "Lock error: failed to acquire lock while listing accounts"
+        post:
+          tags:
+            - accounts
+          operationId: createAccount
+          summary: Create a new account
+          description: Creates a new account with an initial balance. The account ID is
+            automatically generated.
+          requestBody:
+            description: Details for the new account including type and initial balance. The
+              account ID will be automatically generated.
+            required: true
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/CreateAccountRequest"
+                examples:
+                  checking_account:
+                    summary: Create checking account
+                    value:
+                      type: checking
+                      initial_balance: 1000
+                  savings_account:
+                    summary: Create savings account
+                    value:
+                      type: savings
+                      initial_balance: 5000
+          responses:
+            "201":
+              description: Account created successfully
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Account"
+                  examples:
+                    new_account:
+                      summary: Newly created account
+                      value:
+                        account_id: 123e4567-e89b-12d3-a456-426614174000
+                        type: checking
+                        balance: 1000
+            "400":
+              description: Failed to create account due to invalid input
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    invalid_balance:
+                      summary: Invalid initial balance
+                      value:
+                        error_code: INVALID_INPUT
+                        message: "Failed to create account: Initial balance must be non-negative"
+            "500":
+              description: Failed to create account due to internal server error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    creation_error:
+                      summary: Account creation failed
+                      value:
+                        error_code: INTERNAL_ERROR
+                        message: "Failed to create account: Internal server error occurred"
+      /accounts/{accountId}:
+        get:
+          tags:
+            - accounts
+          operationId: getAccountById
+          summary: Retrieve a single account
+          description: Returns details for the specified account including current balance.
+          parameters:
+            - name: accountId
+              in: path
+              required: true
+              description: The UUID of the account to retrieve
+              schema:
+                type: string
+                format: uuid
+              example: 123e4567-e89b-12d3-a456-426614174000
+          responses:
+            "200":
+              description: Account details retrieved successfully
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Account"
+                  examples:
+                    checking_account:
+                      summary: Example checking account
+                      value:
+                        account_id: 123e4567-e89b-12d3-a456-426614174000
+                        type: checking
+                        balance: 1500
+            "404":
+              description: Account lookup failed - specified account ID does not exist
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    not_found:
+                      summary: Account not found error
+                      value:
+                        error_code: NOT_FOUND
+                        message: "Failed to retrieve account: ID 123e4567-e89b-12d3-a456-426614174000
+                          not found"
+            "500":
+              description: Failed to retrieve account details due to internal server error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    server_error:
+                      summary: Internal server error
+                      value:
+                        error_code: INTERNAL_ERROR
+                        message: "Failed to retrieve account: Internal server error occurred"
+        delete:
+          tags:
+            - accounts
+          operationId: deleteAccount
+          summary: Delete an account
+          description: Permanently removes the specified account and all associated data.
+            This operation cannot be undone.
+          parameters:
+            - name: accountId
+              in: path
+              required: true
+              description: The UUID of the account to delete
+              schema:
+                type: string
+                format: uuid
+          responses:
+            "204":
+              description: Account successfully deleted (no content returned)
+            "404":
+              description: Account not found
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+            "500":
+              description: Internal server error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+      /accounts/{accountId}/debit:
+        post:
+          tags:
+            - accounts
+          operationId: debitAccount
+          summary: Debit an account
+          description: Decreases the account's balance by the specified amount.
+          parameters:
+            - name: accountId
+              in: path
+              required: true
+              description: The UUID of the account to debit
+              schema:
+                type: string
+                format: uuid
+              example: 123e4567-e89b-12d3-a456-426614174000
+          requestBody:
+            description: Specifies the amount to debit from the account balance.
+            required: true
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/UpdateBalanceRequest"
+                examples:
+                  small_debit:
+                    summary: Small debit amount
+                    value:
+                      amount: 100
+                  large_debit:
+                    summary: Large debit amount
+                    value:
+                      amount: 1000
+          responses:
+            "200":
+              description: Account debited successfully
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Account"
+                  examples:
+                    successful_debit:
+                      summary: Account after successful debit
+                      value:
+                        account_id: 123e4567-e89b-12d3-a456-426614174000
+                        type: checking
+                        balance: 900
+            "400":
+              description: Debit operation failed due to insufficient funds or invalid amount
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    insufficient_funds:
+                      summary: Insufficient funds error
+                      value:
+                        error_code: INSUFFICIENT_FUNDS
+                        message: "Failed to debit account: Insufficient funds - balance is 900.00,
+                          attempted to debit 1000.00"
+            "404":
+              description: Debit operation failed - account not found
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    not_found:
+                      summary: Account not found
+                      value:
+                        error_code: NOT_FOUND
+                        message: "Failed to debit account: Account does not exist"
+            "500":
+              description: Failed to process debit operation due to internal server error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    server_error:
+                      summary: Internal error
+                      value:
+                        error_code: INTERNAL_ERROR
+                        message: "Failed to debit account: Internal server error occurred"
+      /accounts/{accountId}/credit:
+        post:
+          tags:
+            - accounts
+          operationId: creditAccount
+          summary: Credit an account
+          description: Increases the account's balance by the specified amount.
+          parameters:
+            - name: accountId
+              in: path
+              required: true
+              description: The UUID of the account to credit
+              schema:
+                type: string
+                format: uuid
+              example: 123e4567-e89b-12d3-a456-426614174000
+          requestBody:
+            description: Specifies the amount to credit to the account balance.
+            required: true
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/UpdateBalanceRequest"
+                examples:
+                  small_credit:
+                    summary: Small credit amount
+                    value:
+                      amount: 500
+                  large_credit:
+                    summary: Large credit amount
+                    value:
+                      amount: 5000
+          responses:
+            "200":
+              description: Account credited successfully
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Account"
+                  examples:
+                    successful_credit:
+                      summary: Account after successful credit
+                      value:
+                        account_id: 123e4567-e89b-12d3-a456-426614174000
+                        type: checking
+                        balance: 2000
+            "400":
+              description: Credit operation failed due to invalid amount
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    invalid_amount:
+                      summary: Invalid amount error
+                      value:
+                        error_code: INVALID_INPUT
+                        message: "Failed to credit account: Amount must be positive"
+            "404":
+              description: Credit operation failed - account not found
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    not_found:
+                      summary: Account not found
+                      value:
+                        error_code: NOT_FOUND
+                        message: "Failed to credit account: Account does not exist"
+            "500":
+              description: Failed to process credit operation due to internal server error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+                  examples:
+                    server_error:
+                      summary: Internal error
+                      value:
+                        error_code: INTERNAL_ERROR
+                        message: "Failed to credit account: Internal server error occurred"
+    components:
+      schemas:
+        Account:
+          type: object
+          description: Represents a bank account with its core details including ID, type,
+            and current balance.
+          example:
+            account_id: 123e4567-e89b-12d3-a456-426614174000
+            type: checking
+            balance: 1500
+          properties:
+            account_id:
+              type: string
+              format: uuid
+              description: Unique identifier for the account (UUID v4)
+              example: 123e4567-e89b-12d3-a456-426614174000
+            type:
+              type: string
+              description: The type of the account (e.g., checking, savings)
+              example: checking
+            balance:
+              type: number
+              format: double
+              description: The current balance of the account in the account's currency
+              example: 1500
+        CreateAccountRequest:
+          type: object
+          description: Request payload for creating a new account.
+          example:
+            type: savings
+            initial_balance: 5000
+          required:
+            - type
+            - initial_balance
+          properties:
+            type:
+              type: string
+              description: The type of account to create (e.g., checking, savings)
+              example: savings
+            initial_balance:
+              type: number
+              format: double
+              description: The initial balance to fund the account with
+              example: 5000
+        UpdateBalanceRequest:
+          type: object
+          description: Request payload for updating an account's balance via credit or
+            debit operations.
+          example:
+            amount: 100
+          required:
+            - amount
+          properties:
+            amount:
+              type: number
+              format: double
+              description: The amount to credit or debit from the account
+              example: 100
+        ErrorResponse:
+          type: object
+          description: Standard error response structure for all error cases.
+          example:
+            error_code: NOT_FOUND
+            message: The requested account does not exist.
+          required:
+            - error_code
+            - message
+          properties:
+            error_code:
+              type: string
+              description: A standardized error code identifying the type of error
+              example: NOT_FOUND
+              enum:
+                - INTERNAL_ERROR
+                - NOT_FOUND
+                - INSUFFICIENT_FUNDS
+                - INVALID_INPUT
+            message:
+              type: string
+              description: A human-readable description of the error
+              example: The requested account does not exist.
+  meta:
+    id: spc_daf5d81422754e278a5124f4cb6e4935
+    created: 1769718184444
+    modified: 1769786389907
+testSuites:
+  - name: Accounts API Test Suite
+    meta:
+      id: uts_9b100225d07c45b382512615b5fb7cf6
+      created: 1769782223750
+      modified: 1769786055283
+      sortKey: -1769782223751
+    tests:
+      - name: Accounts API Test Suite
+        meta:
+          id: ut_702bc6dd2bfa41c78efbdb7b4fa37c77
+          created: 1769782311427
+          modified: 1769782329282
+          sortKey: -1769782311428
+        code: |-
+          const response1 = await insomnia.send();
+          expect(response1.status).to.equal(200);
+      - name: Create an Account
+        meta:
+          id: ut_c3f5806af2494899846e7dc50f125887
+          created: 1769786093964
+          modified: 1769786110025
+          sortKey: -1769786093964
+        requestId: req_8948c471bb1e473fba17bca4b94c31e8
+        code: const response =await
+          insomnia.send();expect(response.status).to.equal(201);const account
+          =JSON.parse(response.data);expect(account).to.have.property('account_id').that.is.a('string');expect(account).to.have.property('type').that.is.a('string');expect(account).to.have.property('balance').that.is.a('number');
+      - name: List All Accounts
+        meta:
+          id: ut_30e8b00f3b6f4286b5e12ab24cafe90f
+          created: 1769786123939
+          modified: 1769786201846
+          sortKey: -1769786108951.5
+        requestId: req_f80ff46bf29e4616b07f94d88387f1e1
+        code: const response =await
+          insomnia.send();expect(response.status).to.equal(200);const accounts
+          =JSON.parse(response.data);expect(accounts).to.be.an('array');if(accounts.length>0){const
+          account = accounts[0];expect(account).to.have.property('account_id');}
+      - name: Health Check
+        meta:
+          id: ut_db22964c381443e6b112189cb95f6236
+          created: 1769786219654
+          modified: 1769786231889
+          sortKey: -1769786219654
+        requestId: req_740eea33aff84dd396cb162a11737963
+        code: const response =await
+          insomnia.send();expect(response.status).to.equal(200);const body =
+          response.data;expect(body).to.be.a('string');expect(body.toLowerCase()).to.include('accounts
+          api');
+      - name: Credit Account
+        meta:
+          id: ut_4ed4279f787b43ab990e30cf86dbdc1f
+          created: 1769786248717
+          modified: 1769786262597
+          sortKey: -1769786248717
+        requestId: req_1f6fee5bda684ec2a2f0f1822840db1d
+        code: const response =await
+          insomnia.send();expect(response.status).to.equal(200);const account
+          =JSON.parse(response.data);expect(account).to.have.property('balance').that.is.a('number');
+      - name: Debit Account
+        meta:
+          id: ut_43810a4cc2b1437ca279614a86632001
+          created: 1769786275090
+          modified: 1769786286508
+          sortKey: -1769786275090
+        requestId: req_e01d120747e042f3a07977dc895c82ae
+        code: const response =await
+          insomnia.send();expect(response.status).to.equal(200);const account
+          =JSON.parse(response.data);expect(account).to.have.property('balance').that.is.a('number');
+      - name: Get Account by ID
+        meta:
+          id: ut_5c7fe3edb24942ad8c8dc7fe09528de6
+          created: 1769786299255
+          modified: 1769786316122
+          sortKey: -1769786299256
+        requestId: req_98804a4d650f4122b35dc39d6d40ae5b
+        code: const response =await
+          insomnia.send();expect(response.status).to.equal(200);const account
+          =JSON.parse(response.data);expect(account).to.have.property('account_id').that.is.a('string');
+      - name: Delete Account by ID
+        meta:
+          id: ut_13fe9869076a4b84a666ad8671d73ab0
+          created: 1769786759389
+          modified: 1769786772292
+          sortKey: -1769786529322.5
+        requestId: req_082538f03dfe482db1b535fde1dfa021
+        code: const response =await
+          insomnia.send();expect(response.status).to.equal(204);expect(response.data).to.satisfy((body)=>
+          body ===''|| body ===null);
