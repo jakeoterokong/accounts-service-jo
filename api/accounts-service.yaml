@@ -528,6 +528,36 @@ spec:
                       value:
                         error_code: INTERNAL_ERROR
                         message: "Failed to retrieve account: Internal server error occurred"
+        delete:
+          tags:
+            - accounts
+          operationId: deleteAccount
+          summary: Delete an account
+          description: Permanently removes the specified account and all associated data.
+            This operation cannot be undone.
+          parameters:
+            - name: accountId
+              in: path
+              required: true
+              description: The UUID of the account to delete
+              schema:
+                type: string
+                format: uuid
+          responses:
+            "204":
+              description: Account successfully deleted (no content returned)
+            "404":
+              description: Account not found
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
+            "500":
+              description: Internal server error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorResponse"
       /accounts/{accountId}/debit:
         post:
           tags:
@@ -777,7 +807,7 @@ spec:
   meta:
     id: spc_daf5d81422754e278a5124f4cb6e4935
     created: 1769718184444
-    modified: 1769786344508
+    modified: 1769786389907
 testSuites:
   - name: Accounts API Test Suite
     meta:
